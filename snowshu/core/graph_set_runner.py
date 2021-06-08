@@ -25,6 +25,7 @@ class GraphExecutable:
     source_adapter: BaseSourceAdapter
     target_adapter: BaseTargetAdapter
     analyze: bool
+    compile_method: str
 
 
 class GraphSetRunner:
@@ -40,7 +41,8 @@ class GraphSetRunner:
                           target_adapter: BaseTargetAdapter,
                           threads: int,
                           analyze: bool = False,
-                          barf: bool = False) -> None:
+                          barf: bool = False,
+                          compile_method: str = None) -> None:
         """ Processes the given graphs in parallel based on the provided adapters
 
             Args:
@@ -59,11 +61,14 @@ class GraphSetRunner:
         view_graph_set = [graph for graph in graph_set if graph.contains_views]
         table_graph_set = list(set(graph_set) - set(view_graph_set))
 
+        if compile_method:
+            logger.info(f"Setting compilation method for graphs to '{compile_method}' ")
         def make_executables(graphs) -> List[GraphExecutable]:
             return [GraphExecutable(graph,
                                     source_adapter,
                                     target_adapter,
-                                    analyze) for graph in graphs]
+                                    analyze,
+                                    compile_method) for graph in graphs]
 
         # TODO errors in the parallel execution are never handled
         # This can result in replicas with missing relations as
@@ -96,13 +101,13 @@ class GraphSetRunner:
                     nx.algorithms.dag.topological_sort(executable.graph)):
                 relation.population_size = executable.source_adapter.scalar_query(
                     executable.source_adapter.population_count_statement(relation))
-                logger.info(f'Executing graph {i+1} of {len(executable.graph)} source query '
+                logger.info(f'Executing relation {i+1} of {len(executable.graph)} source query '
                             f'for relation {relation.dot_notation}...')
 
                 relation.sampling.prepare(relation,
                                           executable.source_adapter)
                 relation = RuntimeSourceCompiler.compile_queries_for_relation(
-                    relation, executable.graph, executable.source_adapter, executable.analyze)
+                    relation, executable.graph, executable.source_adapter, executable.analyze, executable.compile_method)
 
                 if executable.analyze:
                     if relation.is_view:

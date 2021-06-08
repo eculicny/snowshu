@@ -22,17 +22,19 @@ class ReplicaFactory:
 
     def create(self,
                name: Union[str, None],
-               barf: bool) -> None:
+               barf: bool,
+               compile_method: str) -> None:
         self.run_analyze = False
-        return self._execute(name=name, barf=barf)
+        return self._execute(name=name, barf=barf, compile_method=compile_method)
 
-    def analyze(self, barf: bool) -> None:
+    def analyze(self, barf: bool, compile_method: str) -> None:
         self.run_analyze = True
-        return self._execute(barf=barf)
+        return self._execute(barf=barf, compile_method=compile_method)
 
     def _execute(self,
                  barf: bool = False,
-                 name: Union[str, None] = None) -> None:
+                 name: Union[str, None] = None,
+                 compile_method: str = None) -> None:
         graph = SnowShuGraph()
         if name is not None:
             self.config.name = name
@@ -51,7 +53,8 @@ class ReplicaFactory:
                                  self.config.target_profile.adapter,
                                  threads=self.config.threads,
                                  analyze=self.run_analyze,
-                                 barf=barf)
+                                 barf=barf,
+                                 compile_method=compile_method)
         if not self.run_analyze:
             relations = [
                 relation for graph in graphs for relation in graph.nodes]

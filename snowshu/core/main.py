@@ -85,14 +85,18 @@ def init(path: click.Path) -> None:
     '--barf',
     is_flag=True,
     help="outputs the source query sql to a local folder snowshu_barf_output")
+@click.option('--compile-method',
+              default=None,
+              help="Uses a different compilation method than legacy")
 def create(replica_file: click.Path,
            name: str,
-           barf: bool):
+           barf: bool,
+           compile_method: str):
     """Generate a new replica from a replica.yml file.
     """
     replica = ReplicaFactory()
     replica.load_config(replica_file)
-    click.echo(replica.create(name, barf))
+    click.echo(replica.create(name, barf, compile_method))
 
 
 @cli.command()
@@ -105,12 +109,15 @@ def create(replica_file: click.Path,
 @click.option('--barf', '-b',
               is_flag=True,
               help="outputs the source query sql to a local folder snowshu_barf_output")
-def analyze(replica_file: click.Path, barf: bool):
+@click.option('--compile-method',
+              default=None,
+              help="Uses a different compilation method than legacy")
+def analyze(replica_file: click.Path, barf: bool, compile_method: str):
     """Perform a "dry run" of the replica creation without actually executing, and return the expected results."""
 
     replica = ReplicaFactory()
     replica.load_config(replica_file)
-    click.echo(replica.analyze(barf))
+    click.echo(replica.analyze(barf, compile_method))
 
 
 @cli.command()

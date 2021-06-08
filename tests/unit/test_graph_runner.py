@@ -28,7 +28,7 @@ def test_traverse_and_execute_analyze(stub_graph_set):
         rel.include_outliers=False
         rel.sampling=DefaultSampling()
 
-    dag_executable = GraphExecutable(dag, source_adapter, target_adapter, True)
+    dag_executable = GraphExecutable(dag, source_adapter, target_adapter, True, None)
 
     # longer dag
     runner._traverse_and_execute(dag_executable)
@@ -46,7 +46,7 @@ def test_traverse_and_execute_analyze(stub_graph_set):
     [node for node in iso.nodes][0].include_outliers=False
 
 
-    iso_executable = GraphExecutable(iso, source_adapter, target_adapter, True)
+    iso_executable = GraphExecutable(iso, source_adapter, target_adapter, True, None)
     assert not isinstance(
         getattr(vals.iso_relation, 'data', None), pd.DataFrame)
     runner._traverse_and_execute(iso_executable)
